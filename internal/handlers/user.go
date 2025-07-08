@@ -27,6 +27,7 @@ func CreateUser(c *gin.Context) {
 	// Store the user
 	users[user.ID] = user
 
+	// Send JSON response status Created
 	c.JSON(http.StatusCreated, gin.H{"user": user})
 }
 
@@ -39,7 +40,35 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
+	// Send JSON response status OK
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func GetAllUsers(c *gin.Context) {
+	// Create a slice of user structs
+	userList := make([]models.User, 0, len(users))
+	// Loop over and append each user to userList
+	for _, user := range users {
+		userList = append(userList, user)
+	}
+
+	// Send JSON response status OK
+	c.JSON(http.StatusOK, gin.H{"users": userList})
+}
+
+func DeleteUser(c *gin.Context) {
+	// Get user ID from the URL path parameter
+	id := c.Param("id")
+	_, exists := users[id]
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// Delte user with specified id from users
+	delete(users, id)
+	// Send JSON response status OK
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 }
 
 func Ping(c *gin.Context) {
