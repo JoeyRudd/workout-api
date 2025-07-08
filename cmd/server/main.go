@@ -1,26 +1,19 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"workout-api/internal/routes"
 )
 
 var db = make(map[string]string)
 
-func setupRouter() *gin.Engine {
-
-	r := gin.Default()
-
-	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	return r
-}
-
 func main() {
-	r := setupRouter()
+	r := routes.SetupRouter()
 	// Listen and Server in 0.0.0.0:8080
-	r.Run(":8080")
+
+	log.Println("Starting server on 8080")
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatal("Error starting server:", err)
+	}
 }
