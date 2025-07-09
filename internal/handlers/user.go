@@ -3,13 +3,20 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"workout-api/internal/models"
+	"workout-api/internal/services"
 )
 
-// Temporary in memory storage
-var users = make(map[string]models.User)
+type UserHandler struct {
+	userService *services.UserService
+}
 
-func CreateUser(c *gin.Context) {
+func NewUserHandler(userService *services.UserService) *UserHandler {
+	return &UserHandler{userService: userService}
+}
+
+func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 
 	// Bind and validate JSON request
@@ -18,24 +25,27 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	// Check id the user already exits
-	if _, exists := users[user.ID]; exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user already exists"})
+	// Create user using service
+	if err := h.userService.CreateUser(user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Store the user
-	users[user.ID] = user
-
 	// Send JSON response status Created
-	c.JSON(http.StatusCreated, gin.H{"user": user})
+	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully"})
 }
 
-func GetUser(c *gin.Context) {
-	// get user
-	id := c.Param("id")
-	user, exists := users[id]
-	if !exists {
+func (h *UserHandler) GetUser(c *gin.Context) {
+	// get user ID from URL parameter
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	user, err := h.userService.GetUserByID(id)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
 	}
@@ -44,29 +54,31 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"user": user})
 }
 
-func GetAllUsers(c *gin.Context) {
-	// Create a slice of user structs
-	userList := make([]models.User, 0, len(users))
-	// Loop over and append each user to userList
-	for _, user := range users {
-		userList = append(userList, user)
-	}
-
-	// Send JSON response status OK
-	c.JSON(http.StatusOK, gin.H{"users": userList})
-}
-
-func DeleteUser(c *gin.Context) {
-	// Get user ID from the URL path parameter
-	id := c.Param("id")
-	_, exists := users[id]
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+	users, err := h.userService.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
 		return
 	}
 
-	// Delte user with specified id from users
-	delete(users, id)
+	// Send JSON response status OK
+	c.JSON(http.StatusOK, gin.H{"users": users})
+}
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	// Get user ID from the URL path parameter
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	if err := h.userService.DeleteUser(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete user"})
+		return
+	}
+
 	// Send JSON response status OK
 	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
 }

@@ -5,17 +5,17 @@ import (
 	"workout-api/internal/handlers"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(userHandler *handlers.UserHandler) *gin.Engine {
 	r := gin.Default()
 
 	// Router check
 	r.GET("/ping", handlers.Ping)
 
 	// User routes
-	r.POST("/users", handlers.CreateUser)
-	r.GET("/users/:id", handlers.GetUser)
-	r.GET("/users", handlers.GetAllUsers)
-	r.DELETE("/users/:id", handlers.DeleteUser)
+	r.POST("/users", userHandler.CreateUser)
+	r.GET("/users/:id", userHandler.GetUser)
+	r.GET("/users", userHandler.GetAllUsers)
+	r.DELETE("/users/:id", userHandler.DeleteUser)
 
 	return r
 }
