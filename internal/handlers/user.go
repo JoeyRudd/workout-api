@@ -50,23 +50,21 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 		return
 	}
 
-	// Send JSON response status OK
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get users"})
 		return
 	}
 
-	// Send JSON response status OK
-	c.JSON(http.StatusOK, gin.H{"users": users})
+	c.JSON(http.StatusOK, users)
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	// Get user ID from the URL path parameter
+	// get user ID from URL parameter
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -79,10 +77,10 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	// Send JSON response status OK
-	c.JSON(http.StatusOK, gin.H{"message": "user deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
 
+// Ping handler for health check
 func Ping(c *gin.Context) {
-	c.String(http.StatusOK, "pong")
+	c.JSON(http.StatusOK, gin.H{"message": "pong"})
 }

@@ -26,8 +26,8 @@ func main() {
 	// Setup router with handlers
 	r := routes.SetupRouter(userHandler)
 
-	log.Println("Starting server on 8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	log.Println("Starting server on 8081")
+	if err := http.ListenAndServe(":8081", r); err != nil {
 		log.Fatal("Error starting server:", err)
 	}
 }

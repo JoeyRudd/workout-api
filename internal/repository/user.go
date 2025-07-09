@@ -39,18 +39,6 @@ func (r *UserRepository) GetByEmail(email string) (models.User, error) {
 	return *u, err
 }
 
-func (r *UserRepository) Update(user models.User) error {
-	query := "UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4"
-	_, err := r.db.Exec(query, user.Name, user.Email, user.Password, user.ID)
-	return err
-}
-
-func (r *UserRepository) Delete(id int) error {
-	query := "DELETE FROM users WHERE id = $1"
-	_, err := r.db.Exec(query, id)
-	return err
-}
-
 func (r *UserRepository) GetAll() ([]models.User, error) {
 	query := "SELECT id, name, email, password FROM users"
 	rows, err := r.db.Query(query)
@@ -68,5 +56,17 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 		}
 		users = append(users, u)
 	}
-	return users, rows.Err()
+	return users, nil
+}
+
+func (r *UserRepository) Update(user models.User) error {
+	query := "UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4"
+	_, err := r.db.Exec(query, user.Name, user.Email, user.Password, user.ID)
+	return err
+}
+
+func (r *UserRepository) Delete(id int) error {
+	query := "DELETE FROM users WHERE id = $1"
+	_, err := r.db.Exec(query, id)
+	return err
 }
