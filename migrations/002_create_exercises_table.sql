@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS exercises (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    muscle_group VARCHAR(255),
+    equipment_type VARCHAR(255) NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
