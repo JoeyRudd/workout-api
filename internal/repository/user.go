@@ -14,15 +14,17 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(user models.User) error {
+	// Insert into users table with auto-generated timestamps
 	query := "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)"
 	_, err := r.db.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 
 func (r *UserRepository) GetById(id int) (models.User, error) {
-	query := "SELECT id, name, email, password FROM users WHERE id = $1"
+	// Select from users table including timestamps
+	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE id = $1"
 	u := &models.User{}
-	err := r.db.QueryRow(query, id).Scan(&u.ID, &u.Name, &u.Email, &u.Password)
+	err := r.db.QueryRow(query, id).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return models.User{}, nil
 	}
@@ -30,9 +32,9 @@ func (r *UserRepository) GetById(id int) (models.User, error) {
 }
 
 func (r *UserRepository) GetByEmail(email string) (models.User, error) {
-	query := "SELECT id, name, email, password FROM users WHERE email = $1"
+	query := "SELECT id, name, email, password, created_at, updated_at FROM users WHERE email = $1"
 	u := &models.User{}
-	err := r.db.QueryRow(query, email).Scan(&u.ID, &u.Name, &u.Email, &u.Password)
+	err := r.db.QueryRow(query, email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.CreatedAt, &u.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return models.User{}, nil
 	}
@@ -40,7 +42,7 @@ func (r *UserRepository) GetByEmail(email string) (models.User, error) {
 }
 
 func (r *UserRepository) GetAll() ([]models.User, error) {
-	query := "SELECT id, name, email, password FROM users"
+	query := "SELECT id, name, email, password, created_at, updated_at FROM users"
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -50,7 +52,7 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		err := rows.Scan(&u.ID, &u.Name, &u.Email, &u.Password)
+		err := rows.Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.CreatedAt, &u.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +62,7 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 }
 
 func (r *UserRepository) Update(user models.User) error {
-	query := "UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4"
+	query := "UPDATE users SET name = $1, email = $2, password = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4"
 	_, err := r.db.Exec(query, user.Name, user.Email, user.Password, user.ID)
 	return err
 }
